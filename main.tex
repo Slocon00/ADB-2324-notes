@@ -1,0 +1,60 @@
+\documentclass[12pt]{report}
+\usepackage{graphicx} % Required for inserting images
+\linespread{1.2}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tikz}
+\usepackage[breakable]{tcolorbox}
+\usepackage{colortbl}
+\appto{\bibsetup}{\raggedright}
+
+\tikzstyle{mybox} = [draw=BrickRed, fill=BrickRed!5, ultra thick, rectangle, rounded corners, inner sep=10pt, inner ysep=15pt, text width=0.90\textwidth, align=left] 
+\tikzstyle{boxtitle} = [fill=BrickRed, text=Apricot!20, ultra thick, rectangle, rounded corners, inner sep=10pt, inner ysep=8pt, text width=0.90\textwidth]
+
+\newcommand{\BoxDef}[2]{%
+\vspace*{10px}
+\noindent
+
+\begin{center}
+\begin{tikzpicture}
+    \node[mybox](box){\rule{0pt}{30pt}\ignorespaces#2\unskip};
+    \node[boxtitle, anchor=north west] at (box.north west) {\textbf{#1}};
+\end{tikzpicture}
+\end{center}
+}
+
+\usepackage[hidelinks]{hyperref}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm, centering]{geometry}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\begin{document}
+
+\begin{titlepage}
+\hrule
+\vspace{15pt}
+\begin{center}
+    \Huge{\textbf{\Huge \textbf{Advanced Databases 23-24}} \\ Notes}\\
+\end{center}
+\vspace{15pt}
+\hrule
+\vfill
+\hrule
+\begin{center}
+    \Large University of Pisa \\ M.Sc. in Computer Science
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+
+\input{Intro}
+\input{Overview}
+
+\nocite{*}
+\bibliographystyle{plain}
+\clearpage\bibliography{bibliography}
+
+\end{document}
