@@ -1,0 +1,118 @@
+\chapter{Access Method Management}
+
+The Access Methods Manager provides an interface with several operations to interact with the organizations and indexes implemented by the Storage Structure Manager, so that data can be transferred between main and permanent memory. The language used to implement these operations transform the machine into an \textbf{abstract database machine}, called the database management system. Abstract database machines are divided into two parts:
+\begin{itemize}
+    \item \textbf{Relational Engine}, or abstract machine for the logical data model. Includes modules to support the execution of SQL commands;
+    \item \textbf{Storage Engine}, or abstract machine for physical data model. Includes modules to execute operations on the data in permanent memory.
+\end{itemize}
+
+\section{Storage Engine}
+
+The interface of the Storage Engine depends on the data structures used in permanent memory. Normally, it is not directly available to the user, who will instead interact with the Relational Engine which in turn will communicate with the Storage Engine. We will consider an interface inspired by that of the relational system JRS, which stores relations into heap files and provides B$^+$-tree indexes.
+
+\paragraph{Data and Transactions}
+
+\begin{itemize}
+    \item $beginTransaction : null \mapsto TransactionId$
+    
+    \item $commit : TransactionId \mapsto null$
+    
+    \item $abort : TransactionId \mapsto null$
+    
+    \item $createDB : Path \times DBName \times TransactionId \mapsto DB$
+    
+    \item $createHF : DB \times Path \times HFName \times TransactionId \mapsto HF$
+    
+    \item $createIdx : DB \times Path \times IdxName \times HFName \times Attr \times Ord \times Unique \times TransactionId \mapsto Idx$
+    
+    \item $dropBD : DBName \times TransactionId \mapsto null$
+    
+    \item $dropHF : HFName \times TransactionId \mapsto null$
+    
+    \item $dropIdx : IdxName \times TransactionId \mapsto null$
+\end{itemize}
+
+\paragraph{Heap File}
+
+\begin{itemize}
+    \item $HFopen : DB \times HFName \times TransactionId \mapsto HF$
+
+    \item $HFCcose: HF \mapsto null$
+
+    \item $HFgetRecord : HF \times RID \mapsto Record$
+
+    \item $HFdeleteRecord : HF \times RID \mapsto null$
+
+    \item $HFupdateRecord : HF \times RID \times FieldNum \times NewField \mapsto null$
+
+    \item $HFinsertRecord : HF \times Record \mapsto RID$
+
+    \item $HFgetNPage : HF \mapsto int$
+
+    \item $HFgetNRec : HF \mapsto int$
+\end{itemize}
+
+\paragraph{Indexes}
+
+\begin{itemize}
+    \item $Iopen : DB \times IdxName \times TransactionId \mapsto Idx$
+
+    \item $Iclose : Idx \mapsto null$
+
+    \item $IdeleteEntry : Idx \times Entry \mapsto null$ ($Entry = Value \times RID$)
+
+    \item $IinsertEntry : Idx \times Entry \mapsto null$
+    
+    \item $IgetNKey : Idx \mapsto int$
+    
+    \item $IgetNLeaf : Idx \mapsto int$
+
+    \item $IgetMin : Idx \mapsto Value$
+
+    \item $IgetMax : Idx \mapsto Value$
+\end{itemize}
+
+\section{Access Method Operators}
+
+The following operations transfer data between main and permanent memory. Records of a heap file or of an index are accessed by scans: a heap file scan operator reads each record one after the other, while an index scan operator provides a way to efficiently retrieve the RID of the records. Heap file and index scan operators are implemented using a \textbf{cursor} (or \textbf{iterator}), which is an object with methods that can return one record at a time and move across records. The typical structure of program that scans heap files/indexes is:
+\begin{algorithm}
+\caption{Typical structure of program that uses scan operators.}
+\begin{algorithmic}[1]
+    \While{$! C.isDone()$}
+        \State $Val = C.getCurrent()$
+        \State $\dots$
+        \State $C.next()$
+    \EndWhile
+\end{algorithmic}
+\end{algorithm}
+Here $C$ is the cursor object.
+
+\paragraph{Heap File Scan}
+
+\begin{itemize}
+    \item $HFSopen : HF \mapsto HFS$
+
+    \item $HFSisDone : HFS \mapsto bool$
+
+    \item $HFSgetCurrent : HFS \mapsto RID$
+
+    \item $HFSnext : HFS \mapsto null$
+
+    \item $HFSreset : HFS \mapsto null$
+
+    \item $HFSclose : HFS \mapsto null$
+\end{itemize}
+
+\paragraph{Index Scan}
+
+\begin{itemize}
+    \item $ISopen : Idx \times fstKey \times lstKey \mapsto IS$
+
+    \item $ISisDone : IS \mapsto bool$
+
+    \item $ISgetCurrent : IS \mapsto null$
+
+    \item $ISreset : IS \mapsto null$
+
+    \item $ISclose : IS \mapsto null$
+\end{itemize}
