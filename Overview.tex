@@ -412,7 +412,7 @@ where each value $k_i$ of $K$ is followed by the number of records $n$ with that
 
 Each entry in the inverted index has variable length, depending on how many records in the table $R$ have the same value for the attribute. Also, RIDs are added or removed as records are added or removed from the table. Despite the need to manage these indexes, they are still widely used, especially for cases in which searches are more common than insertions of deletions.
 
-To evaluate performances, we will introduce these new terms: $N_{key}(Idx)$ and $N_{leaf}(Idx)$, which are the number of distinct keys and leaf nodes in the index $Idx$. Also, all estimates are done assuming that index-key values are uniformly distributed, as well as records, and the index organization is a B$^+$-tree with the RID lists stored in the leaves. Each cost will be broken down into $C_I$ and $C_D$, as seen before.
+To evaluate performances, we will introduce these terms: $N_{key}(Idx)$ and $N_{leaf}(Idx)$, which are the number of distinct keys and leaf nodes in the index $Idx$. Also, all estimates are done assuming that index-key values are uniformly distributed, as well as records, and the index organization is a B$^+$-tree with the RID lists stored in the leaves. Each cost will be broken down into $C_I$ and $C_D$, as seen before.
 
 For the equality search, the cost of accessing the index is simply $sf(\psi) \times N_{leaf}(Idx)$, or, alternatively, $\ceil{N_{leaf}(Idx) / N_{key}(Idx)}$. Here, $sf$ is calculated as:
 \begin{equation*}

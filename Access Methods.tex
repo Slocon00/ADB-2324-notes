@@ -116,3 +116,7 @@ Here $C$ is the cursor object.
 
     \item $ISclose : IS \mapsto null$
 \end{itemize}
+
+\section{Physical Plans}
+
+When a SQL query must be executed, it is first represented as a \textbf{logical plan}, which is a tree representation of the query, and is eventually transformed in a form that can be more efficiently evaluated. This transformed logical plan is then translated into a \textbf{physical plan}, which contains as nodes the actual physical operators that can implement that query. Each operator in a plan is an iterator that uses a ``pull'' interface: when an operator receives a request from above, it ``pulls'' on its input node(s) and computes the result, returning it to its parent operator. An operator interface provides the necessary methods \textit{open}, \textit{next}, \textit{isDone}, and \textit{close}, implemented using the Storage Engine interface.
