@@ -87,7 +87,7 @@ Returns the records of $R$ sorted by the attribute the index $I$ is defined on. 
     C = \begin{cases}
         N_{leaf}(I) + N_{pag}(R) & \text{if $I$ is clustered} \\
         N_{leaf}(I) + N_{rec}(R) & \text{if $I$ is on a key of $R$} \\
-        N_{leaf}(I) + \ceil{N_{key}(I) \times \phi(\ceil{N_{pag}(R) / N_{pag}(I)}, N_{pag}(R))} & \text{else}
+        N_{leaf}(I) + \ceil{N_{key}(I) \times \phi(\ceil{N_{rec}(R) / N_{key}(I)}, N_{pag}(R))} & \text{else}
     \end{cases}
 \end{equation*}
 The result size is
@@ -333,7 +333,7 @@ This operator requires that there is an index on the join column of the internal
 \begin{algorithmic}
     \For{$r \in O_E$}
         \For{$s \in$ IndexFilter($O_I, I, O_E.e1 = O_I.i1$)}
-            \State If $\psi_J$, add $<r,s>$ to the result.
+            \State Add $<r,s>$ to the result.
         \EndFor
     \EndFor
 \end{algorithmic}
@@ -348,7 +348,7 @@ where $C_I$ and $C_D$ are the costs to retrieve the relevant index records and t
 \end{equation*}
 if instead it is a Filter(IndexFilter($S, I, \psi_J$), $\psi$), the result size is
 \begin{equation*}
-    E_{rec} = \ceil{sf(\psi_J) \times E_{rec}(O_E) \times (sf(\psi) \times_{rec}(S))}
+    E_{rec} = \ceil{sf(\psi_J) \times E_{rec}(O_E) \times (sf(\psi) \times N_{rec}(S))}
 \end{equation*}
 
 \paragraph{MergeJoin($O_E, O_I, \psi_J$)}

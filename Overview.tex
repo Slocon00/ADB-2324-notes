@@ -207,7 +207,7 @@ where $H_i$ produces a page address in the range $[0, 2^i M-1]$. The function ch
 for all keys $k$. This means that the new hash function chosen either returns the same address the key already corresponds to, or a new address that is equal to the original one plus half of the new address space. A common function is $H_r(k) = k \mod (2^r \times M)$.
 
 To find a record, known its key and $r$ (the number of times the data area has been doubled), a recursive function is used:
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{PageSearch pseudocode.}
 \begin{algorithmic}[1]
     \If{$r < 0$}
@@ -233,7 +233,7 @@ The hash structure is initially empty, with $p=0$, and is a directory with one e
 
     \item If $p' < p$, then the data page is split in two, creating a new page, and each of the halves' level $p'$ take value $p'+1$. The records in the original page are distributed across the halves, based on the value of the first high-order bit of their hash keys. Records whose key has 0 in the $(p'+1)^{th}$ bit stay in the old page, while those with a 1 will go in the new one. The pointers in the directory are updated so that those that pointed to the original page now point to the new half, depending on the value of the $(p'+1)^{th}$ bit.
 \end{itemize}
-The advantage of this method is that performance does not degrade as the file grows, and the directory $\mathcal{B}$ keeps the memory overhead low. The retrieval of a record has an additional level of indirection since $\mathcal{b}$ must be accessed first, but this has very little impact on the performance, since most of the directory ill be in main memory.
+The advantage of this method is that performance does not degrade as the file grows, and the directory $\mathcal{B}$ keeps the memory overhead low. The retrieval of a record has an additional level of indirection since $\mathcal{B}$ must be accessed first, but this has very little impact on the performance, since most of the directory will be in main memory.
 
 \paragraph{Linear Hashing}
 
@@ -261,7 +261,7 @@ the hashing function distributes records unevenly, accumulating records in the p
 
 \subsubsection{Tree-structure Organizations}
 
-All the previous organizations have the big disadvantage of not supporting the range equality search operation. An alternative organization commonly used in DBMSs use dynamic tree structures to store pages. The \textbf{order} of a tree is the maximum number of children a node can have. The \textbf{level} of a node is the number of nodes encountered in the path from the root to the node itself. The \textbf{height} of the tree is the macimum level of a node. A tree is \textbf{balanced} if the levels of all leaf nodes differ by at most 1.
+All the previous organizations have the big disadvantage of not supporting the range equality search operation. An alternative organization commonly used in DBMSs use dynamic tree structures to store pages. The \textbf{order} of a tree is the maximum number of children a node can have. The \textbf{level} of a node is the number of nodes encountered in the path from the root to the node itself. The \textbf{height} of the tree is the maximum level of a node. A tree is \textbf{balanced} if the levels of all leaf nodes differ by at most 1.
 
 The types of trees most commonly used are B-trees and B$^+$-trees, since unlike binary trees they manage to keep a relatively low height even with an high number of pages. One solution may be to store the nodes of the binary tree in main memory, such that each page contains the same number of nodes. In the example shown in Figure \ref{fig:paged-bintree}, each page contains 8 nodes, each of which refers to 8 different pages. Using this strategy, the depth of the tree in terms of pages to access is greatly reduced: an equality search has a complexity of $\log_8 (N_{pag}(R))$ instead of $\log_2 (N_{pag}(R))$.
 
@@ -306,7 +306,7 @@ A B-tree of order $m \geq 3$ is an $m$-way search tree that is either empty or o
 }
 There is a strict relationship between the height of the tree $h$, the order $m$, and the number of keys $N$. Since the non-root nodes are constrained in the number of keys they must maintain, the following inequality holds true:
 \begin{equation*}
-    \log_m (N+1) \leq h \leq \log_{\ceil{m/2}}\dfrac{N+1}{2} + 1
+    \log_m (N+1) \leq h \leq \log_{\ceil{m/2}}(\dfrac{N+1}{2}) + 1
 \end{equation*}
 The left size of the inequality corresponds to a B-tree with all of its nodes completely filled, while the right side to a B-tree where each node has the least acceptable amount of keys.
 
@@ -339,8 +339,8 @@ Table \ref{tab:B-tree-comp} summarizes all the operation costs.
 \begin{tblr}{hlines, vlines, columns={80pt, c, m}, column{1}={60pt}}
     & \textbf{Eq. Search} ($C_s$) & \textbf{Range Search} & \textbf{Insertion} & \textbf{Deletion} \\
 \hline
-    Best case & 1 & $h \leq sf \times N_{nodes} \leq N_{nodes}$ & $h + 1$ & $h + 1$ or $(h + 2)$ \\     
-    Worst case & $h$ & $h \leq sf \times N_{nodes} \leq N_{nodes}$ & $2h + 1$ & $(2h - 1) + (h + 1)$ \\
+    Best case & 1 & $sf \times N_{nodes} = h$ & $h + 1$ & $h + 1$ or $(h + 2)$ \\     
+    Worst case & $h$ & $sf \times N_{nodes} = N_{nodes}$ & $2h + 1$ & $(2h - 1) + (h + 1)$ \\
 \end{tblr}
     \caption{Costs for B-tree organization.}
     \label{tab:B-tree-comp}

@@ -98,7 +98,7 @@ Consider a query on a set of tables $R_1(T_1), \dots, R_n(T_n)$, such that no at
 
 Distinct normally requires a physical plan with duplicate elimination, and data must be grouped, usually via a sort operation (which is expensive). A query with a Distinct clause is translated into a relational algebra expression with the projection and duplicate elimination operators. To decide whether this duplicate elimination operator is unnecessary, a functional dependency theory algorithm is used. Specifically, the following theorem is used:
 \BoxDef{Theorem}{
-Let $A$ be the set of attributes of the result and $K$ the union of the attributes of the key for every table used in the query. If $A \rightarrow K$, then the duplication is unnecessary.
+Let $A$ be the set of attributes of the result and $K$ the union of the attributes of the key for every table used in the query. If $A \rightarrow K$, then the duplicate elimination is unnecessary.
 }
 To find out whether $A \rightarrow K$, the closure of $A$ is computed.
 
@@ -248,7 +248,7 @@ The second case is more complicated:
 \begin{equation*}
     \sigma_{\phi_F} ({}_X \gamma_{AGG(A_1) \ AS \ F_1, \dots, AGG(A_n) \ AS \ F_n} (E))
 \end{equation*}
-Equivalence rules can be built only in these two cases:
+Equivalence rules can be built only in these two case
 \begin{gather*}
     \sigma_{\phi_{Mb \geq v}} ({}_X \gamma_{MAX(b) \ AS \ Mb} (E)) \equiv {}_X \gamma_{MAX(b) \ AS \ Mb} (\sigma_{b} \geq v(E))\\
     \sigma_{\phi_{mb \leq v}} ({}_X \gamma_{MIN(b) \ AS \ mb} (E)) \equiv {}_X \gamma_{MIN(b) \ AS \ mb} (\sigma_{b} \leq v(E))
