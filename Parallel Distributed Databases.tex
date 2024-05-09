@@ -1,0 +1,173 @@
+\chapter{Parallel and Distributed Databases}
+
+A \textbf{parallel system} is one that allows parallel processing of operations. A \textbf{distributed system} is one composed of several machines working together to achieve the same goal. Databases can be hosted on single machines, which may also be parallel systems, or across different components of a distributed architectures (each of which in turn can also be parallel). An extreme case of distributed architecture is represented by \textbf{peer-to-peer} networks, a collection of independent machines without any kind of centralized index that states which portion of the data is located where.
+
+\section{Parallel Systems}
+
+\subsection{Models of Parallelism}
+
+Parallel architectures can be categorized into three groups:
+\begin{itemize}
+    \item \textbf{Shared-memory machines}: all processors share the same main memory, but each have their own cache.
+
+    \item \textbf{Shared-disk machines}: each processor has its own memory, not accessible from the others. However, they all share the same permanent memory.
+
+    \item \textbf{Shared-nothing machines}: all processors have their own memory and disk(s). All communication between them is done through the network, from processor to processor. This is also the most commonly used architecture for database systems.
+
+    Algorithms designed for these machines must be aware of the cost of sending messages between processors: typically, the cost of sending a message is made up of a large, fixed overhead plus a certain small cost per byte transmitted. This means that it is more convenient to send large amounts of data at once instead of sending several small messages.
+\end{itemize}
+
+\subsection{Data Partitioning}
+
+Different techniques can be used to distribute data across disks. Assuming there are $p$ processors, the possible strategies are:
+\begin{itemize}
+    \item \textbf{Range partitioning}: the $i^{th}$ node will receive $\sigma_{k(i) < A \leq k(i+1)}$.
+    
+    \item \textbf{Hash partitioning}: a hash function is applied to one of the attributes of the relation, for example a function modulo $p$ that distributes the records across $p$ ``buckets''.
+
+    \item \textbf{Random partitioning with round-robin}: records are simply randomly assigned to the processors, one at a time, in a circular fashion.
+
+    \item \textbf{Block partitioning with round-robin}: same as before, but entire blocks are assigned instead of one record at a time.
+
+    \item \textbf{Co-located partitioning}: after partitioning a relation $R$ into a set of $R_i$ using any of the previous techniques, the semijoin $(S, R_i)$ between another table $S$ and a single partition $R_i$ is stored in the $i^{th}$ node. This is especially useful to execute a join in parallel.
+\end{itemize}
+The number of fragments may be fixed in advance and then mapped to the nodes, or it may be dynamic, growing and shrinking with the nodes. Also, fragments are typically duplicated for resilience. Relations can also be vertically partitioned, isolating (subsets of) attributes to assign to different nodes.
+
+Data partitioning is fundamental for parallel execution, but also as a way to access only certain parts of the data when the data is partitioned, and to allocate crucial fragments to the fastest processors.
+
+\subsection{Parallel Algorithms}
+
+\begin{itemize}
+    \item \textbf{Distinct}: to perform a Distinct, tuples are distributed using an hash function and Distinct is then executed locally, in parallel on all nodes.
+
+    \item \textbf{Union, Intersection, Difference}: if the two relations are hashed with the same function, these operations can be executed locally. Otherwise, if there are $p$ processors, both relations are rehashed with a function in $[0,p-1]$ and each tuple $t$ is sent to $h(t)$. Every processor has $p$ buffers in main memory, and a buffer is sent to the corresponding machine only when full.
+
+    \item \textbf{Join}: the tuples of the two relations $R$ and $S$ are distributed using the same hash function that only depends in the join attribute (or, in the case of multiple attributes, at least on one of them), and the actual join is then done locally.
+
+    Specifically, there are four algorithms for joining relations. \textbf{Co-located join} is used when $R$ and $S$ are partitioned in the same way and fragments are co-located, so it's a local algorithm. If the relations are partitioned in the same way but not co-located, the \textbf{directed join} is used, choosing one of the two and sending it to the corresponding nodes of the other. If they aren't partitioned in the same way, \textbf{repartitioned join} repartitions one (or both) using the same approach and then uses directed join. Finally, \textbf{broadcast join} is used when one of the two tables is very small: a copy of the entire table is sent to each node.
+
+    \item \textbf{GroupBy}: similar to the join, the tuples of the relation are distributed using an hash function on a subset of the grouping attributes, and the GroupBy is done locally. The number of attributes chosen for the hashing should be such that it distributes tuples equally across processors.
+
+    \item \textbf{Projection and Filter}: both operations can be performed locally.
+\end{itemize}
+When parallel algorithms are used, the number of total accesses and CPU time increase, but elapsed time (hopefully) will be lower than a simple sequential execution. A unary operator will take $\frac{1}{p}$ of the elapsed time if there are $p$ processors operating in parallel.
+
+For join, since it is a binary operator, evaluating the total cost is a bit more complex. Assuming a worst-case scenario (repartitioning is needed), it can be broken down into the following components:
+\begin{enumerate}
+    \item $\dfrac{N_{pag}(R) + N_{pag}(S)}{p}$ to read and hash the tuples.
+
+    \item $\dfrac{(N_{pag}(R) + N_{pag}(S))}{(p-1)/p}$ blocks of data are sent around.
+
+    \item The hash-join or sort-merge join done at every node has a cost of $(2*N_{pag})/p$.
+\end{enumerate}
+This means that the elapsed time is almost the same as the sequential time divided by $p$, since the only extra cost is represented by the message passing. This cost depends strictly on how fast the processors can communicate: if the network connecting them has low capacity and is easily overloaded, whenever two nodes are already communicating the other ones have to wait; if instead the network has very high capacity, enough to accommodate all communications, then the cost model should take in consideration that messages are sent in parallel.
+
+Another thing to consider is that here we're assuming data is distributed uniformly (justifying the first component), but this is not always true. If one of the nodes ends up with a lot more tuples than the others, the latter will have to wait until it finishes. Many systems use specific techniques to mitigate this issue.
+
+\section{Distributed Systems}
+
+Distributed systems are very similar to shared-nothing systems. The difference is in the assumption about the cost of communication, because in parallel systems the cost of message passing is typically small compared to disk accessed, because the nodes are connected in a high capacity network; in distributed systems, instead, processors are usually physically distant, so the network connecting them may not have very high capacity, and as such the cost of exchanging messages can be very high. Additionally, since communication is not as reliable (sites may not be reachable whether because of network or site issues), the system can get partitioned in two, such that the nodes in partition ``A'' cannot communicate with nodes in group ``B'', and vice-versa. Different sites can also be managed by different authorities, and may have different levels of trust in the communications (although systems with little trust are called peer-to-peer instead of distributed).
+
+A big advantage of distributed systems is that they are resilient to failures by duplicating data at several sites, as opposed to parallel ones where any failure would involve the entire set of nodes.
+
+\subsection{Data Distribution}
+
+An important reason to distribute data is that the organization is itself distributed among many sites, and each site will store some data. Distribution is expensive, so the goal is to reduce the number of communication between sites to a minimum. This can be achieved through partitioning and replication.
+
+\textbf{Partitioning} is either horizontal or vertical, as seen before. An example of horizontal partitioning is dividing the data into groups of records, each corresponding to a different nation; an example of vertical partitioning is keeping only certain attributes relevant to item, date, and customer id out of a relation summarizing sales if we want to execute a lot of queries that use those attributes.
+
+\textbf{Replication} means copying fragments of relations to guarantee resilience. Replication makes reading faster and updates slower, so in applications with very little updates performances may improve.
+
+The data distribution design phase is divided into two steps: first, all relations are divided horizontally/vertically into fragments; then, each fragment is associated to $n$ sites: a primary copy can be chosen, i.e., the copy with higher priority. Deciding how to split the data is simple, while deciding how to assign fragments is a difficult optimization problem.
+
+\subsection{Distributed Query Processing}
+
+Since communication between sites has a significant cost, there are some query plans that are more efficient than those used by parallel systems where processors communicate locally. The biggest challenge is computing joins. There are two possibilities: either one of the tables is very small and is sent to the sites containing the fragments of the other, or the \textbf{semijoin reduction} is used.
+
+The semijoin plan to compute Join($R(X,Y), S(Y,Z)$) is:
+\begin{enumerate}
+    \item Send $\pi_Y(R)$ to the site containing $S$; let it be called $s$.
+
+    \item $s$ calculates $S_1$ = Semijoin($\pi_Y(R), S(Y,Z)$), which returns all the records of $S$ which satisfy the join condition.
+
+    \item $s$ sends $S_1$ to $r$ (the site containing $R$).
+
+    \item $R$ computes the join between $R$ and the semijoin, which is equivalent to the join between the full tables.
+\end{enumerate}
+This approach is convenient when $Y$ is reasonably smaller than $X$ and $Z$.
+
+\subsection{Distributed Consistency}
+
+Transactions are now a distributed process that coordinates local transactions. A transaction is no longer a piece of code executed by a single processor communicating with a single log manager at a single site; a transaction consists of different components, each at a different site, and communicating with the local scheduler and logger. So, how are commit/abort decisions handled when a transaction is distributed? How is serializability guaranteed?
+
+Another thing to consider is data replication: how do we avoid divergences in case of replication? And is it convenient to define a primary copy, or should all copies be treated equally?
+
+\subsubsection{Distributed Commit}
+
+Aborting transactions is not a problem: once a part of a transaction aborts in a site, the latter will communicate to the transaction manager, which in turn will abort all other transactions in the other sites (each using their own protocol, undo-redo or otherwise). The difficult case is committing, because if one site tries to commit the transaction but at the same time some other site running the same transaction, there is no obvious way of dealing with it.
+
+A common protocol used for distributed commits is \textbf{two-phase commit}. We assume many-site transactions but a single site acting as a coordinator; each site has its own log, and whenever a site sends a message to another one, it is recorded in the log of the sender. There is a coordinator $C$ and a set of participants $P_i$.
+
+In the first phase, $C$ writes $<\textit{Prepare}, T>$ on its log, and sends to each participant the following message: $\textit{send}(P_i, \textit{prepare} \ T)$. Each participant must answer, either communicating that it can't commit, or that it wants to commit. If it wants to commit, the participant will enter the \textbf{pre-committed} state, writing $<\textit{ready}, T>$ on its log and sending it to $C$, so that from now on only $C$ can abort the transaction.
+
+The second phase has two possibilities depending on how the participants responded. If they all sent a ready message, the transaction can be committed if the coordinator wishes to, but if even only one participant answered ``no'' or did not answer, the transaction must be aborted.
+\begin{itemize}
+    \item If $C$ chooses or has to abort, it writes $<\textit{Abort}, T>$ on its log (this is done first to make sure the coordinator always knows of this decision even in case of a crash), and then sends an abort message to every $P_i$. Every participant will abort the transaction and write the abort on its log.
+
+    \item If $C$ chooses to commit, it writes $<\textit{Commit}, T>$ on its log, and sends a commit message to every $P_i$. Every participant will then write the commit message to the log.
+\end{itemize}
+After this phase, all participants exit pre-committed state and resume normal execution.
+
+The main property of this protocol is that it offers a simple restart procedure that maintains consistency. The two things to prove are: if there is a failure at any moment, we can always recover, and f every site is guaranteed to eventually restart, then the protocol is guaranteed to eventually terminate.
+
+Observe how if a participant or coordinator writes a decision to the log, sends a message, and then fails, once this actor restarts it will read its log and, just to be sure the message is actually sent out, will resend the message. This phenomenon of duplicated messages is not a problem, because message send is idempotent.
+
+A message can also be lost. For example, the receiver may crash right after extracting the message from its buffer but before writing on its log. Also, if an actor is waiting for a message (for example, the coordinator waiting for a participant's answer) it can set up a timeout after which a message will be solicited. The specifics of how to set this up are not part of the protocol, but it is important that the actor can reiterate the request multiple times, and then eventually assume the partner is down.
+
+The third design principle is that restart is log-guided: whenever a message is sent, it is first written on the log, so during restart it can be re-scanned and the messages can be eventually re-sent.
+
+There are two procedures for restarting a participant and restarting the coordinator.
+
+\paragraph{Restarting a Participant}
+If the last record in the log is a commit or an abort of a transaction, the restart is handled as the non-distributed case.
+
+If it is a ``don't commit'' or a write message, a local abort is performed. There is no need to resend the ``don't commit'' message to the coordinator, because if it wasn't sent before the crash, the coordinator will eventually solicit the message from the participant anyway.
+
+If it is a ``ready'', the participant must contact the coordinator and the other sites to discover what its decision was; until an answer is obtained, the participant will keep the transaction in the pre-committed state, so it can neither be committed nor aborted.
+
+If all the participants are ready but the coordinator is unable to answer, there is no way to proceed until the coordinator makes a decision. This is called \textbf{critical case}.
+
+\paragraph{Restarting the Coordinator}
+If the last record in the coordinator's log is a ``prepare'' for a transaction, it may decide to either abort it (which is always allowed before the transaction is committed by none of the participants), or simply do nothing.
+
+If the last record is an abort, it may resend the abort or also do nothing: if a participant did not receive the abort message, it will eventually ask for information about the transaction. \\
+If the last record is a commit, same thing as before, either resend or do nothing.
+
+\subsubsection{Distributed Locking}
+
+In distributed systems, data is replicated. To guarantee consistency, we must ensure that all copies of the same data object are changed in the same way by each transaction. There are two ways to implement locking: either with actual locks (pessimistic approach), or with timestamps (optimistic approach). In this section we will only discuss the former method; the timestamp-based one will be discussed later with NoSQL systems.
+
+Locks can be acquired either on all the physical copies of the same object, or on the logical data.
+
+In the \textbf{centralized solution} (physical locks), there is a centralized lock site managing access to logical elements. When a transaction wants to get a lock on a logical element X, it sends a request to the lock site, who will grant or deny the lock as appropriate. Since acquiring a global lock on X is the same as obtaining a local lock on X in the lock site, global locks are guaranteed to work correctly as long as the lock site works correctly. The usual cost is three messages per lock: a request, a grant, and a release. The only exception is if the lock is requested by the lock site itself. Using a single lock site may not be the ideal solution if the system has a lot of sites and a lot of concurrent transactions. Also, if the lock site crashes, all the other sites cannot acquire locks on data until the site is restarted. If the lock site is kept in a separate network from the other sites, there are two points of failure.
+
+In the \textbf{distributed solution}, a logical lock is taken on copies of data. The lock can be acquired either on the primary copy, or on any copy. In the first approach, one copy has to be declared primary, and is the only one on which locks are taken: updates are propagated to other copies in a second time. This approach creates a bottleneck, since all transactions that want to use the same object have to take locks on that copy, as well as a single point of failure, represented by the site holding that copy. For this reason, many systems prefer the second approach: every copy has its own lock, and transactions will take an lock on the local copies on the elements it needs. The big problem to deal with is consistency: multiple transactions may work on different copies of the same object in different sites, where one transaction takes a shared lock, and the other takes an exclusive lock. \\
+The two possible solutions are:
+\begin{itemize}
+    \item \textbf{Write-locks-all}: in order to write, a transaction must get an exclusive lock on all copies; in order to read, one lock is enough.
+
+    \item \textbf{Majority locking}: in order to read or write, a transaction must acquire $\frac{(n+1)}{2}$ corresponding locks ($S$ for reading, $X$ for writing), where $n$ is the number of copies.
+\end{itemize}
+There may even be intermediate solutions, moving the ``quorum'' to different values for $S$ and $X$ locks. The conditions that must hold to guarantee consistency are:
+\begin{gather*}
+    x + x > n \\
+    s + x > n
+\end{gather*}
+where $x$ and $s$ are the quorum for exclusive locks and the quorum for shared locks, respectively. Some typical cases include:
+\begin{itemize}
+    \item $x = s = (n+1)/2$ (the one used in majority locking);
+    \item $x=n, s=1$ (the one used in write-locks-all);
+    \item $x=n-1, s=2$.
+\end{itemize}
+
+To deal with deadlocks, all the solutions seen in the previous sections can be used: wait-for graphs, timeouts, prevention (wait-die, wound-wait protocols). In practice, timeouts are preferred.
