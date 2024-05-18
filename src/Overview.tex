@@ -37,7 +37,7 @@ The architecture of a DBMS provides the following basic components:
 \end{itemize}
 In real systems the functionalities of these modules are not completely separated in different components (as in Figure \ref{fig:DBMS_schema}), but this overview can help in understanding the purpose of each of them. 
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.75\linewidth]{img/DBMS schema.png}
     \caption{The architecture of a DBMS.}
@@ -54,7 +54,7 @@ Once a physical page is transferred to main memory, it is called a \textbf{page}
 
 The Buffer Manager is tasked with transferring pages between temporary and permanent memory. It allows transactions to get the pages they need minimizing the number of disk accesses. In general, the performance of operations on a database depends on the number of pages transferred to temporary memory. If a big enough buffer is used, and there's a high number of access requests for a specific page, there's a high likelihood that such page will be in the buffer. Figure \ref{fig:buffermanager} illustrates the basic structure of a Buffer Manager.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\linewidth]{img/Buffer Manager.png}
     \caption{The components of the Buffer Manager.}
@@ -121,7 +121,7 @@ Table \ref{tab:heap-seq-comp} shows a comparison between the two organization ty
 \end{equation*}
 with $k_1$ and $k_2$ being the two extremes of the range, and $k_{max}$ and $k_{min}$ the highest and lowest values in the domain of the attribute.
 
-\begin{table}[h]
+\begin{table}[ht]
 \small
 \centering
 \SetTblrInner{rowsep=5pt}
@@ -207,7 +207,7 @@ where $H_i$ produces a page address in the range $[0, 2^i M-1]$. The function ch
 for all keys $k$. This means that the new hash function chosen either returns the same address the key already corresponds to, or a new address that is equal to the original one plus half of the new address space. A common function is $H_r(k) = k \mod (2^r \times M)$.
 
 To find a record, known its key and $r$ (the number of times the data area has been doubled), a recursive function is used:
-\begin{algorithm}[H]
+\begin{algorithm}[ht]
 \caption{PageSearch pseudocode.}
 \begin{algorithmic}[1]
     \If{$r < 0$}
@@ -278,7 +278,7 @@ Still, this structure must be kept balanced when insertions or deletions are per
 
 A B-tree is a perfectly balanced search tree, in which each node has a variable number of children. We will indicate a key as $k$ and the full record associated with it $k*$. Also, we'll assume that all keys are integers and that all records have the same fixed size. An example of B-tree can be seen in Figure \ref{fig:B-tree}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=1.0\linewidth]{img/B-tree.png}
     \caption{A B-tree.}
@@ -332,7 +332,7 @@ For deletion, there's three possibilities:
 \end{itemize}
 Table \ref{tab:B-tree-comp} summarizes all the operation costs.
 
-\begin{table}[h]
+\begin{table}[ht]
 \small
 \centering
 \SetTblrInner{rowsep=5pt}
@@ -350,7 +350,7 @@ Table \ref{tab:B-tree-comp} summarizes all the operation costs.
 
 B$^+$-trees are a variant of B-trees that perform especially well for range searches. In a B$^+$-tree, all the records $k*$ are stored sorted in the leaf nodes, organized in a doubly linked list. Each non-leaf node stores the highest key of the child pointed by the previous pointer. An example of B$^+$-tree can be seen in Figure \ref{fig:B+-tree}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=1\linewidth]{img/B+-tree.png}
     \caption{A B$^+$-tree.}
@@ -378,7 +378,7 @@ The cost for searches done using this organization can be broken down into two t
 \end{equation*}
 where $C_I$ is the cost of accessing the index pages to find the $RID$s needed, and $C_D$ is the cost of accessing the actual data pages containing the records. Table \ref{tab:indexes-comp} summarizes the differences between the two types of indexes.
 
-\begin{table}[h]
+\begin{table}[ht]
 \small
 \centering
 \SetTblrInner{rowsep=5pt}
@@ -452,7 +452,7 @@ If the RID lists are unsorted, then the second term is always $\ceil{N_{rec}(R) 
 
 The summary of performances is shown in Table \ref{tab:inverted-idx}.
 
-\begin{table}[h]
+\begin{table}[ht]
 \small
 \centering
 \SetTblrInner{rowsep=5pt}
@@ -490,7 +490,7 @@ while the number of leaves for a bitmap index is:
 \end{equation*}
 Using these approximations, if the number of distinct values of the attribute is low, then a bitmap index is more convenient than an inverted index (as seen in Figure \ref{fig:bitmap-vs-inverted}). 
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\linewidth]{img/bitmap_vs_inverted.png}
     \caption{Memory usage of bitmap and inverted indexes.}
@@ -503,7 +503,7 @@ Multidimensional (or spatial) data is used to represent geometric objects and th
 
 A way to solve this issue is to partition the space into areas with the same amount of points, so that each partition can be mapped to a separate page and allow quick retrieval of points that are spatially close together. Consider the dataset represented in Figure \ref{fig:multidim-start}, and suppose that pages have a capacity of 2. The data space is first divided choosing a division value $d$ on one coordinate, so that all points whose attribute value for that coordinate is less than $d$ are inserted into a page, those with a higher value are inserted into the other one. $d$ is usually chosen as the half of the range or the median value. The first split is in Figure \ref{fig:multidim-index} (a), done on the $x$ axis. If the partitions are still too big to fit into pages, then a split is repeated considering another axis (Figure \ref{fig:multidim-index} (b)). The splits continue alternating axes until each partition contains a small enough number of records. All the records belonging to the same partition will be found in the same page.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \begin{minipage}{0.49\textwidth}
     \centering
@@ -533,7 +533,7 @@ G-trees are the data structure used to store multidimensional indexes, where eac
     \item In general, when a partition $R$ is split, the subpartitions will have a code that is equal to the code of the parent and 0/1 appended at the end.
 \end{itemize}
 Each partition code is then padded so that they all reach $M$ bits, where $M$ is the maximum number of splits made. The G-tree stores these codes like a B$^+$-tree, where the leaves contain all the codes and the internal nodes alternate pointers to leaves and duplicate keys.
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\linewidth]{img/G-tree.png}
     \caption{Example of partition coding.}

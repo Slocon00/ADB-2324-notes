@@ -102,9 +102,7 @@ If the optimizer does not transform SQL queries, they can be explicitly rewritte
 
 \subsection{Transaction Tuning}
 
-Another common cause of inefficiency in DBMS is the way transactions are programmed. In particular, they should be as short as possible to reduce the duration of the locks they hold over data objects (although as seen before many modern systems use more sophisticated locks instead of read-write locks, so this problem is not as big), and they should not block data during database loading and during read-only transactions.
-
-Complex transactions should be split into smaller ones. Also, if a transaction has to stop because user input is being asked, it should commit and restart after input has been received. Each transaction should have the appropriate block granularity (record, page, table, etc.), as well as the appropriate isolation level:
+Another cause of inefficiency in DBMS is the way transactions are programmed. They should be as short as possible to reduce the duration of the locks they hold over data objects (although as seen before many modern systems use more sophisticated locks instead of read-write locks, so this problem is not as big), and they should not block data during database loading and during read-only transactions. Complex transactions should be split into smaller ones. Also, if a transaction has to stop because user input is being asked, it should commit and restart after input has been received. Each transaction should have the appropriate block granularity (record, page, table, etc.), as well as the appropriate isolation level:
 \begin{itemize}
     \item \textbf{READ UNCOMMITTED}: the reads of records are performed without requesting any locks, so dirty reads are possible;
 

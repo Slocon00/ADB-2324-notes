@@ -3,7 +3,7 @@
 Decision support systems are a type of \textbf{information system}. An information system is an organized collection of resources, people, and procedures finalized to collect, store, process and communicate information needed to support the on-going activities. Information can be represented as images, text, audio, or really any kind of data.
 
 Traditional applications that use databases are called \textbf{OLTP} (\textbf{On Line Transactional Processing}), while decision support applications are called \textbf{OLAP} (\textbf{On Line Analytical Processing}). The key difference between the two is that OLTP systems are used for mostly day-by-day operations, using transactions, while OLAP systems are used to analyze the data to try and extract some hidden knowledge without updating the data. Table \ref{tab:oltp-vs-olap} compares the two in more detail.
-\begin{table}[h]
+\begin{table}[ht]
     \centering
     \small
     \begin{tblr}{
@@ -49,7 +49,7 @@ A data warehouse is a subject-oriented, integrated, non-volatile, and time-varyi
 The term ``data warehousing'' is used to refer to the process of organizing data in a data warehouse to allow end users to analyze it with business intelligence applications. The most common architecture is a three-layer one, composed of the \textbf{data sources}, \textbf{data staging}, and \textbf{data warehouse}.
 
 The data warehouse is loaded with data extracted via \textbf{ETL} (\textbf{Extract, Transform, and Load}) applications from the many different sources of data in the previous layer, bringing them into a consistent form and performing any kind of cleaning needed, and finally storing them into the data staging. The complexity of data staging depends on the quality of the data sources.
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\linewidth]{img/three_layer_architecture.png}
     \caption{Scheme of a data warehouse architecture.}
@@ -79,7 +79,7 @@ The \textbf{Dimensional Fact Model} is a graphical conceptual model for data war
 In the presence of dimensions, an hierarchical relationship can be modeled among them. For example, imagine a fact table with dimensions relating to dates (Year, Quarter, Month, Week, Day). A hierarchy can be constructed (Day $\rightarrow$ Week $\rightarrow$ Month $\rightarrow$ Quarter $\rightarrow$ Year) such that each element is more general than those coming before it, and less general than those after. In this case, Month is more general than Day, but is less general than Quarter. Formally, each arc of the hierarchy models a \textbf{functional dependency} between the two attributes. Graphically, hierarchies are represented as a directed tree, rooted in a dimension, and with the leaves representing the most general dimensions.
 
 The presence of a hierarchy increases the possibilities of data analysis from different perspectives (so-called multidimensional analysis). If we already analyzed sales by year, we can also analyze them at a deeper level, considering months or days.
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.75\linewidth]{img/hierarchies.png}
     \caption{Conceptual design without and with hierarchies.}
@@ -95,19 +95,19 @@ In a \textbf{star schema}, the fact table is placed a the center, and a foreign 
 A \textbf{snowflake schema} is similar to a star schema, but some dimension tables are also normalized, splitting the data into additional tables.
 
 A \textbf{constellation schema} has multiple fact tables that share dimension tables.
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.65\linewidth]{img/star_schema.png}
     \caption{Star schema.}
     \label{fig:star-schema}
 \end{figure} 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.65\linewidth]{img/snowflake_schema.png}
     \caption{Snowflake schema.}
     \label{fig:snowflake-schema}
 \end{figure}
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.65\linewidth]{img/constellation_schema.png}
     \caption{Constellation schema.}
@@ -119,7 +119,7 @@ A \textbf{constellation schema} has multiple fact tables that share dimension ta
 A \textbf{multidimensional data model} (data cube) represents facts with $n$ dimensions as points in an $n$-dimensional space. A point (fact) is identified by the values of its dimensions, and has an associated set of measures. This view is an intuitive way to think about OLAP queries and their results.
 
 For example, imagine a fact table with information about store sales. Each record in the original data has three attributes: a store id, a product id, and an associated quantity. We can see this data as 2-dimensional: the two dimensions are the store and the product id, while the measure is the quantity.
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \begin{minipage}{0.49\textwidth}
         \centering
@@ -166,7 +166,7 @@ Assume that, given a data cube, eacj dimension is extended with an additional va
 
 An order relation can be defined between cuboids: $C1 \preceq C2$ if $C1$ can be computed from $C2$. This order is visualized using a \textbf{data warehouse lattice}. In the example below, we can see how the cuboid (StoreId) can be computer from (StoreId, ProductId), but (StoreId, ProductId, DateId) cannot be computed from (StoreId, ProductId). So, how do we choose which of these cuboids to store? Obviously, the source data allows us to compute all other cuboids. However, if the queries most commonly executed only consider a subset of the dimensions, we may store those (or store one of those above them).
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lattice.png}
     \caption{A data warehouse lattice. The data cube it corresponds to has three dimensions: StoreId, ProductId, and Date.}
