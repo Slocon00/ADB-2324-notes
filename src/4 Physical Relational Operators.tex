@@ -96,7 +96,7 @@ The result size is
 \end{equation*}
 
 \paragraph{IndexSequentialScan($R, I$)}
-Returns the records of $R$, stored with the primary organization $I$, sorted in ascending order on the primary key values. It costs
+Returns the records of $R$, stored with the primary organization index sequential file $I$, sorted in ascending order on the primary key values. It costs
 \begin{equation}
     C = N_{leaf}(I)
 \end{equation}
@@ -142,7 +142,7 @@ If instead it contains multiple attributes, the result size is
 \begin{equation*}
     E_{rec} = \min(|O|/2, \prod_i N_{key}(A_i))
 \end{equation*}
-This is a pessimistic estimate: it assumes that there is a record for each set of values taken from the attributes in $O$, but this is often not the actual result. For example, imagine a database containing data about students enrolled at a university, and the two attributes represent their first name and last name respectively: it is unrealistic to expect that there will be a different student for each first name-last name combination, since the two attributes are loosely correlated.
+This is a pessimistic estimate: it assumes that there is a record for each set of values taken from the attributes in $O$, but this is often not the actual result. For example, imagine a database containing data about students enrolled at a university, and the two attributes represent their first name and last name respectively: it is unrealistic to expect that there will be a different student for each first name-last name combination, even if the two attributes are loosely correlated.
 
 \paragraph{HashDistinct($O$)}
 Returns the records of $O$ without duplicates using and hash technique. This technique has two phases: \textbf{partitioning} and \textbf{duplicate elimination}. Assume the query processor has $B+1$ buffer pages. In the partitioning phase, for each record in $O$ the hash function $h_1$ is applied, distributing records uniformly across the $B$ pages. Once a page $i$ is full, it is written to the $T_i$ partition file. At the end of the phase, all records will be scattered across $B$ files, each of which contains records with the same hash value; this means that duplicates are found in the same partition.
@@ -167,7 +167,7 @@ if $O$ contains multiple attributes.
 Returns the records of $O$ sorted on the attributes $\{A_i\}$. The sorting algorithm used is merge sort, so its cost is
 \begin{equation*}
     C = \begin{cases}
-        C(O) & N_{pag}(R) < B \\
+        C(O) & N_{pag}(O) < B \\
         C(O) + 2 \times N_{pag}(O) & N_{pag}(O) \leq B \times (B-1) \\
         C(O) + 2 \times N_{pag}(O) \times \ceil{log_{B-1}(N_{pag}(O) / B)} & \text{else}
     \end{cases}
@@ -219,7 +219,7 @@ The result size is
 \end{equation*}
 
 \paragraph{IndexSequentialFilter($R,I,\psi$)}
-Returns the sorted records of $R$, stored with the primary organization $I$, satisfying the condition $\psi$, which involves only the attributes of the index search key. It costs
+Returns the sorted records of $R$, stored with the primary organization index sequential file $I$, satisfying the condition $\psi$, which involves only the attributes of the index search key. It costs
 \begin{equation*}
     C = \ceil{sf(\psi) \times N_{leaf}(I)}
 \end{equation*}
@@ -269,9 +269,7 @@ Joins the external operand $O_E$ with the internal operand $O_I$ with the follow
 \begin{algorithmic}
     \For{$r \in O_E$}
         \For{$s \in O_I$}
-            \If{$\psi_J$}
-                \State If $\psi_J$, add $<r,s>$ to the result.
-            \EndIf
+            \State If $\psi_J$, add $<r,s>$ to the result.
         \EndFor
     \EndFor
 \end{algorithmic}
@@ -282,7 +280,7 @@ It costs
 \end{equation*}
 The result size is
 \begin{equation*}
-    E_{rec} = sf(C_j) \times E_{rec}(O_E) \times E_{rec}(O_I)
+    E_{rec} = sf(\psi_j) \times E_{rec}(O_E) \times E_{rec}(O_I)
 \end{equation*}
 
 \paragraph{PageNestedLoop($O_E, O_I, \psi_J$)}
@@ -307,7 +305,7 @@ The cost of the operator is
 The algorithm cost is lower when the external operand is the one with fewer pages.
 The result size is
 \begin{equation*}
-    E_{rec} = sf(C_j) \times E_{rec}(O_E) \times E_{rec}(O_I)
+    E_{rec} = sf(\psi_j) \times E_{rec}(O_E) \times E_{rec}(O_I)
 \end{equation*}
 
 \paragraph{BlockNestedLoop($O_E, O_I, \psi_J$)}
@@ -323,7 +321,7 @@ The cost is lower if the external relation has fewer pages than the internal one
 \end{equation*}
 The result size is
 \begin{equation*}
-    E_{rec} = sf(C_j) \times E_{rec}(O_E) \times E_{rec}(O_I)
+    E_{rec} = sf(\psi_j) \times E_{rec}(O_E) \times E_{rec}(O_I)
 \end{equation*}
 This operator is not convenient to use when the operators require too many pages (i.e., $N_{pag}R \geq B^2$).
 

@@ -63,7 +63,7 @@ The Buffer Manager is tasked with transferring pages between temporary and perma
 
 The \textbf{buffer pool} is an array of \textbf{frames}, each containing a copy of a page present in permanent memory, and some additional bookkeeping information. The pool has a fixed size, so when there are no more free frames, a page must be freed with an appropriate algorithm. Each frame stores two variables, the \textbf{pin count} and the \textbf{dirty}. The former counts the number of transactions currently using the page hosted on that frame; its value starts at 0, and increases by 1 each time it is requested, and decreases by 1 each time it is released. The latter indicates whether the page was modified since it was copied into the buffer, signaling that the modification must be reflected on disk as well. The \textbf{resident pages} table is a hash table that is used to know which page in permanent memory (identified by a PID) is stored in which frame.
 
-A commonly used replacement policy id the \textbf{Least Recently Used} (\textbf{LRU}) policy. Once the buffer pool is full, the frame chosen to be ejected is the one that was the earliest one to be pinned. The idea is that since the page hasn't been requested for a relatively long time, it probably won't be requested any time soon. However, this policy may not always be the best: for example, in a join loop between two tables, the LRU policy may be optimal for one table, while the optimal one for the other is Most Recently Used (MRU).
+A commonly used replacement policy is the \textbf{Least Recently Used} (\textbf{LRU}) policy. Once the buffer pool is full, the frame chosen to be ejected is the one that was the earliest one to be pinned. The idea is that since the page hasn't been requested for a relatively long time, it probably won't be requested any time soon. However, this policy may not always be the best: for example, in a join loop between two tables, the LRU policy may be optimal for one table, while the optimal one for the other is Most Recently Used (MRU).
 
 \subsection{Storage Structures Manager}
 
@@ -85,7 +85,7 @@ Since typically temporary memory cannot hold all of the records of a file at the
 \end{enumerate}
 Once the algorithm terminates, the final auxiliary file contains the sorted data. $Z$ is called the \textbf{merge order}, and a total of $Z + 1$ buffer pages are needed to execute a $Z$-merge (since as stated above, one page must be left free).
 
-The cost of the algorithm is evaluated in terms of how many read/write operations are needed in total, Since we're ignoring operations directly involving records. The overall cost is given by two terms:
+The cost of the algorithm is evaluated in terms of how many read/write operations are needed in total, since we're ignoring operations directly involving records. The overall cost is given by two terms:
 \begin{align*}
     C_{sort}(R) = SortCost + MergeCost = \\
     = 2 \times N_{pag}(R) + 2 \times N_{pag}(R) \times MergePasses
@@ -229,7 +229,7 @@ Let $r$ be a record with key $k$. The value produced by $H(k)$ is a binary value
 
 The hash structure is initially empty, with $p=0$, and is a directory with one entry containing a pointer to an empty page of capacity $c$. The first $c$ records are inserted in the page; as we try to insert a new record into a full page, there are two possibilities:
 \begin{itemize}
-    \item If $p' = p$, $\mathcal{B}$ is doubled and $p$ becomes $p+1$. Let $w$ be the bits of the previous value of $p$. Then, the entries in the doubled directory indexed by $w_0$ and $w_1$ each contain a pointer to the same data page that $w$ used to point to.
+    \item If $p' = p$, $\mathcal{B}$ is doubled and $p$ becomes $p+1$. Let $w$ be the bits of the previous value of $p$. Then, the entries in the doubled directory indexed by $w0$ and $w1$ each contain a pointer to the same data page that $w$ used to point to.
 
     \item If $p' < p$, then the data page is split in two, creating a new page, and each of the halves' level $p'$ take value $p'+1$. The records in the original page are distributed across the halves, based on the value of the first high-order bit of their hash keys. Records whose key has 0 in the $(p'+1)^{th}$ bit stay in the old page, while those with a 1 will go in the new one. The pointers in the directory are updated so that those that pointed to the original page now point to the new half, depending on the value of the $(p'+1)^{th}$ bit.
 \end{itemize}
@@ -300,7 +300,7 @@ A B-tree of order $m \geq 3$ is an $m$-way search tree that is either empty or o
     \end{equation*}
     where each $p_i$ is a pointer to a child node such that, for all $0 < i < j$:
     \begin{align*}
-        &\forall k \in K(p_i), \ k_{i-1} < k < k_{i+1}
+        &\forall k \in K(p_i), \ k_{i} < k < k_{i+1}
     \end{align*}
 \end{itemize}
 }
@@ -464,9 +464,9 @@ The summary of performances is shown in Table \ref{tab:inverted-idx}.
 }
      & \textbf{Eq. Search} & \textbf{Range Search} \\
     \hline
-     Sorted RID lists, unclustered & $C_I = \dfrac{1}{N_{key}(Idx)} \times N_{leaves}(Idx)$, $C_D = \Phi(E_{rec}, N_{pag})$ & $C_I = \dfrac{v2 - v1}{v_{max} - v_{min}} \times N_{leaves}(Idx)$, $C_D = sf(\Psi) \times N_{key}(Idx) \times \Phi(\dfrac{N_{rec}(R)}{N_{key}(Idx)}, N_{pag}(R))$ \\
      Sorted RID lists, clustered & $C_I = $ as above, $C_D = \dfrac{1}{N_{key}(Idx)} \times N_{pag}(R)$ & $C_I = $ as above, $C_D = sf(\Psi) \times N_{pag}(R)$ \\
-     Unsorted RID lists & $C_I = $ as above, $C_D = E_{rec}$ & $C_I = $ as above, $C_D = sf(\Psi) \times N_{key}(Idx) \times \dfrac{N_{rec}(R)}{N_{key}(Idx)}$ \\
+     Sorted RID lists, unclustered & $C_I = \dfrac{1}{N_{key}(Idx)} \times N_{leaves}(Idx)$, $C_D = \Phi(E_{rec}, N_{pag})$ & $C_I = \dfrac{v2 - v1}{v_{max} - v_{min}} \times N_{leaves}(Idx)$, $C_D = sf(\Psi) \times N_{key}(Idx) \times \Phi(E_{rec}, N_{pag}(R))$ \\
+     Unsorted RID lists & $C_I = $ as above, $C_D = E_{rec}$ & $C_I = $ as above, $C_D = sf(\Psi) \times N_{key}(Idx) \times E_{rec}$ \\
     
 \end{tblr}
 \caption{Costs for inverted indexes.}
