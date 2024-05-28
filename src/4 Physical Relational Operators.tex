@@ -1,6 +1,6 @@
 \chapter{Physical Relational Operators}
 
-One of the most important components in a DBMS is the \textbf{Query Manager}, which is responsible of scheduling queries and directing them to the correct tables. Part of the Query Manager is the \textbf{Query Optimizer}, which has the task of determining how to execute a query in the most efficient way possible, considering the physical parameters involved, the data organization, and the presence or absence of indexes.
+One of the most important components in a DBMS is the \textbf{Query Manager}, which is responsible for scheduling queries and directing them to the correct tables. Part of the Query Manager is the \textbf{Query Optimizer}, which has the task of determining how to execute a query in the most efficient way possible, considering the physical parameters involved, the data organization, and the presence or absence of indexes.
 
 This chapter will deal with how different physical operators are implemented, for the following operations:
 \begin{itemize}
@@ -38,9 +38,9 @@ The selectivity factor of a condition is an estimate of the percentage of the re
     \label{tab:sf-cond}
 \end{table}
 
-In many cases, however, attribute values follow non-uniform distributions, making these estimates wrong. The selectivity factor of a condition can be better approximated by knowing the actual distribution of the data, but storing the information needed to have full knowledge about it would occupy too much space. The solution preferred by DBMSs is to use an histogram with binned ranges of values in order to approximate the actual distribution.
+In many cases, however, attribute values follow non-uniform distributions, making these estimates wrong. The selectivity factor of a condition can be better approximated by knowing the actual distribution of the data, but storing the information needed to have full knowledge about it would occupy too much space. The solution preferred by DBMSs is to use a histogram with binned ranges of values in order to approximate the actual distribution.
 
-There's two types of histograms: \textbf{equi-width} and \textbf{equi-height}. Equi-width histograms are obtained by binning values so that each bin has the same amount of elements $n$. For each bin, the sum of the counts of all elements inside that bin is stored. To find the selectivity factor for an equality search given a value $v$, it will be given by the sum associated with the bin $v$ belongs to, divided by $n$. For inequality/range searches, the selectivity factor will consider the sum associated with all the bins completely included in the range, plus the term that is given by the bin(s) corresponding to the extreme(s) of the condition.
+There are two types of histograms: \textbf{equi-width} and \textbf{equi-height}. Equi-width histograms are obtained by binning values so that each bin has the same amount of elements $n$. For each bin, the sum of the counts of all elements inside that bin is stored. To find the selectivity factor for an equality search given a value $v$, it will be given by the sum associated with the bin $v$ belongs to, divided by $n$. For inequality/range searches, the selectivity factor will consider the sum associated with all the bins completely included in the range, plus the term that is given by the bin(s) corresponding to the extreme(s) of the condition.
 
 The problem with equi-width histograms is that while they provide better approximations than a blind uniform distribution assumption, they are not able to correctly approximate the distribution of data to a sufficiently high precision. This is why equi-height histograms are used instead. These histograms are divided into bins such that the sum of counts of values within each (their ``height'') is equal across all of them. To store this type of histogram, the only information needed is the number of elements in each bin.
 
@@ -164,7 +164,7 @@ if $O$ contains multiple attributes.
 \subsection{Operators for Sort}
 
 \paragraph{Sort($O, \{A_i\}$)}
-Returns the records of $O$ sorted on the attributes $\{A_i\}$. The sorting algorithm used is merge sort, so its cost is
+Returns the records of $O$ sorted on the attributes $\{A_i\}$. The sorting algorithm used is merge-sort, so its cost is
 \begin{equation*}
     C = \begin{cases}
         C(O) & N_{pag}(O) < B \\

@@ -46,7 +46,7 @@ In real systems the functionalities of these modules are not completely separate
 
 \subsection{Permanent Memory Manager}
 
-The PMM manages page allocation and deallocation on disk storage. It hides the disk characteristics and the operating system, as it provides an abstraction of the memory as a a set of databases, each consisting of a set of logical files of \textbf{physical pages} (or blocks) of fixed size. The physical pages of a file are numbered consecutively starting from 0, and their number can grow dynamically with the only limitation being the available space in the permanent memory. Each collection of records (table or index) of a database is stored in a logical file, which can also be realized as an actual separate file of the operating system or as part of a file in which the database is stored.
+The PMM manages page allocation and deallocation on disk storage. It hides the disk characteristics and the operating system, as it provides an abstraction of the memory as a set of databases, each consisting of a set of logical files of \textbf{physical pages} (or blocks) of fixed size. The physical pages of a file are numbered consecutively starting from 0, and their number can grow dynamically with the only limitation being the available space in the permanent memory. Each collection of records (table or index) of a database is stored in a logical file, which can also be realized as an actual separate file of the operating system or as part of a file in which the database is stored.
 
 Once a physical page is transferred to main memory, it is called a \textbf{page}, and it is represented with a specific, complex structure.
 
@@ -77,7 +77,7 @@ Collections of pages may be stored using different data structures. Usually, pag
 
 A frequent operation done in DBMS is \textbf{sorting}. Sorting collections of records may be done for different reasons: it may be needed to perform a join operation, delete duplicates, or load them into physical organizations.
 
-Since typically temporary memory cannot hold all of the records of a file at the same time, merging is done by using \textbf{external sorting algorithms}, of which most widely used one is \textbf{merge-sort}. Let $N_{pag}(R)$ be the number of pages in the file, and $B$ the number of available pages on the buffer. Merge-sort operates in two phases:
+Since typically temporary memory cannot hold all the records of a file at the same time, merging is done by using \textbf{external sorting algorithms}, of which most widely used one is \textbf{merge-sort}. Let $N_{pag}(R)$ be the number of pages in the file, and $B$ the number of available pages on the buffer. Merge-sort operates in two phases:
 \begin{enumerate}
     \item The \textbf{sort phase}, in which $B$ pages are read into the buffer, sorted, and written to disk. This creates exactly $n = \ceil{N_{pag}(R) / B}$ sorted subsets of records, called \textbf{runs}. Each run is stored in a separate numbered auxiliary file, and contains the same number of pages (except for the last one, which may contain less if the number of file pages isn't divisible by the number of free buffer pages);
 
@@ -168,7 +168,7 @@ is called the primary area \textbf{loading factor}, which represents how full th
 
 The design of a static hashing organization depends on the choices done for the following parameters:
 \begin{enumerate}
-    \item The \textbf{hashing function}: a good hashing function must randomly assigning keys to elements in the address space. There's no single ``ideal'' hash function, but generally, simpler functions tend to perform better than complex ones. A common choice is the \textbf{modulo function}: $H(k) = k \mod M$, with $M$ a prime number.
+    \item The \textbf{hashing function}: a good hashing function must randomly assign keys to elements in the address space. There's no single ``ideal'' hash function, but generally, simpler functions tend to perform better than complex ones. A common choice is the \textbf{modulo function}: $H(k) = k \mod M$, with $M$ a prime number.
 
     \item The \textbf{overflow management technique}: two commonly used techniques are \textbf{open overflow} and \textbf{chained overflow}. Open overflow performs a primary area linear search to find the first empty space to insert the record; when the last page has been searched, the process restarts from the initial page. Chained overflow collects overflow records chained together in a separate area, pointed to from the home page.
 
@@ -263,7 +263,7 @@ the hashing function distributes records unevenly, accumulating records in the p
 
 All the previous organizations have the big disadvantage of not supporting the range equality search operation. An alternative organization commonly used in DBMSs use dynamic tree structures to store pages. The \textbf{order} of a tree is the maximum number of children a node can have. The \textbf{level} of a node is the number of nodes encountered in the path from the root to the node itself. The \textbf{height} of the tree is the maximum level of a node. A tree is \textbf{balanced} if the levels of all leaf nodes differ by at most 1.
 
-The types of trees most commonly used are B-trees and B$^+$-trees, since unlike binary trees they manage to keep a relatively low height even with an high number of pages. One solution may be to store the nodes of the binary tree in main memory, such that each page contains the same number of nodes. In the example shown in Figure \ref{fig:paged-bintree}, each page contains 8 nodes, each of which refers to 8 different pages. Using this strategy, the depth of the tree in terms of pages to access is greatly reduced: an equality search has a complexity of $\log_8 (N_{pag}(R))$ instead of $\log_2 (N_{pag}(R))$.
+The types of trees most commonly used are B-trees and B$^+$-trees, since unlike binary trees they manage to keep a relatively low height even with a high number of pages. One solution may be to store the nodes of the binary tree in main memory, such that each page contains the same number of nodes. In the example shown in Figure \ref{fig:paged-bintree}, each page contains 8 nodes, each of which refers to 8 different pages. Using this strategy, the depth of the tree in terms of pages to access is greatly reduced: an equality search has a complexity of $\log_8 (N_{pag}(R))$ instead of $\log_2 (N_{pag}(R))$.
 
 \begin{figure}[h!]
     \centering
@@ -314,9 +314,9 @@ The following is a summary of the costs of operations using a B-tree. An equalit
 
 As for the range search, to retrieve all records with keys in increasing order, the tree must be visited in the \textbf{in-order traversal}, starting from the leftmost leaf and gradually moving to the right. Let $sf = (k_2 - k_1)/(k_{max} - k_{min})$ be the selectivity factor for the search; the overall cost will be $C_{range} = sf \times N_{nodes}$, since keys will be ``scattered'' across different nodes of the tree at different levels. The following bond holds true: $h \leq C_{range} \leq N_{nodes}$. It will always require traveling to a leaf, and in the worst case scenario, it may have to read all nodes in the tree.
 
-Insertion in a non-full leaf is easy: the new key is simply added to a leaf so that the keys are correctly sorted. The cost is $h$ reads and 1 write. If the leaf is full, then the node must be split, so that the old node will retain the first half of keys, and the new node will get the second half. The median key is inserted into the parent node, and the new node is pointed by the pointer on its right. In case the parent node is full as well, the operation repeats. The cost for a worst case scenario is $h$ reads and $2h + 1$ writes.
+Insertion in a non-full leaf is easy: the new key is simply added to a leaf so that the keys are correctly sorted. The cost is $h$ reads and 1 write. If the leaf is full, then the node must be split, so that the old node will retain the first half of keys, and the new node will get the second half. The median key is inserted into the parent node, and the new node is pointed by the pointer on its right. In case the parent node is full as well, the operation repeats. The cost for the worst case scenario is $h$ reads and $2h + 1$ writes.
 
-For deletion, there's three possibilities:
+For deletion, there are three possibilities:
 \begin{itemize}
     \item If the key is in a leaf, and the removal keeps the number of keys within the acceptable range, the cost is $h$ reads and 1 write;
 
@@ -397,7 +397,7 @@ In ranged search, both types need the same time to retrieve the relevant indexes
 
 Up until now, all operations were done on keys, i.e., attributes that uniquely identify records. In many cases, however, we may be interested in retrieving records based on the values taken by other attributes. For example, imagine a table representing students attending the same school, each uniquely identified by a numeric code, and containing information about their name and age. An operation we may want to find all students within a specific age range, or all students who share the same surname. This section will describe how such operations can be done efficiently.
 
-Specifically, the three types of operations that can be performed on non-key attributes are the equality search, the range search, and the \textbf{boolean search}, which consists in the previous operations combined together with boolean logical operators.
+Specifically, the three types of operations that can be performed on non-key attributes are the equality search, the range search, and the \textbf{boolean search}, which consists in the previous operations combined with boolean logical operators.
 
 
 \subsubsection{Inverted Indexes}
@@ -420,10 +420,11 @@ For the equality search, the cost of accessing the index is simply $sf(\psi) \ti
 \end{equation*}
 since we're assuming uniform distribution of the values. All RIDs can be found close together since the leaves are sorted by key (i.e., the non-key attribute of the original table).
 
-For $C_D$, the cost is different whether the data is sorted or not on the index key, so whether the index is clustered or unclustered. If it is unclustered, the operation must read all relevant records with no way to estimate where they are; for each record, the whole page must be read. Potentially, we may need to read an entire RID list worth of records, whose size is given by:
+For $C_D$, the cost is different whether the data is sorted or not on the index key, so whether the index is clustered or unclustered. If it is unclusterd, there is no information regarding how the records are ordered in their storage structure, so it may be that for each record, the whole page it is found in must be read. THe number of records to retrieve is estimated as:
 \begin{equation*}
     E_{rec} = sf(\psi) \times N_{rec}(R) = \ceil{\dfrac{N_{rec}(R)}{N_{key}(Idx)}}
 \end{equation*}
+since uniform distribution of the values is assumed.
 The cost of retrieving the data is:
 \begin{equation*}
     C_D = \ceil{\Phi(E_{rec}, N_{pag}(R))} \,,
@@ -464,12 +465,12 @@ The summary of performances is shown in Table \ref{tab:inverted-idx}.
 }
      & \textbf{Eq. Search} & \textbf{Range Search} \\
     \hline
-     Sorted RID lists, clustered & $C_I = $ as above, $C_D = \dfrac{1}{N_{key}(Idx)} \times N_{pag}(R)$ & $C_I = $ as above, $C_D = sf(\Psi) \times N_{pag}(R)$ \\
-     Sorted RID lists, unclustered & $C_I = \dfrac{1}{N_{key}(Idx)} \times N_{leaves}(Idx)$, $C_D = \Phi(E_{rec}, N_{pag})$ & $C_I = \dfrac{v2 - v1}{v_{max} - v_{min}} \times N_{leaves}(Idx)$, $C_D = sf(\Psi) \times N_{key}(Idx) \times \Phi(E_{rec}, N_{pag}(R))$ \\
-     Unsorted RID lists & $C_I = $ as above, $C_D = E_{rec}$ & $C_I = $ as above, $C_D = sf(\Psi) \times N_{key}(Idx) \times E_{rec}$ \\
+     Sorted RID lists, clustered & $C_I = \ceil{sf(\Psi) \times N_{leaves}(Idx)}$, $C_D = \ceil{sf(\Psi) \times N_{pag}(R)}$ & $C_I = \ceil{sf(\Psi) \times N_{leaves}(Idx)}$, $C_D = \ceil{sf(\Psi) \times N_{pag}(R)}$ \\
+     Sorted RID lists, unclustered & $C_I = $ as above, $C_D = \ceil{\Phi(E_{rec}, N_{pag})}$ & $C_I = $ as above, $C_D = \ceil{sf(\Psi) \times N_{key}(Idx)} \times \ceil{\Phi(E_{rec}, N_{pag}(R))}$ \\
+     Unsorted RID lists & $C_I = $ as above, $C_D = E_{rec}$ & $C_I = $ as above, $C_D = \ceil{sf(\Psi) \times N_{key}(Idx)} \times E_{rec}$ \\
     
 \end{tblr}
-\caption{Costs for inverted indexes.}
+\caption{Costs for inverted indexes. $E_{rec}$ is $\ceil{N_{rec}(R)/N_{key(R)}}$}
 \label{tab:inverted-idx}
 \end{table}
 

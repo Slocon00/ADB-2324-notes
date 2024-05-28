@@ -40,15 +40,15 @@ A database can become inconsistent because of three types of failures:
 \end{itemize}
 Other than database backups, another protection from failures is represented by \textbf{log files}: these files contain lines recording each transaction operation executed in the system, including aborted transactions. For each transaction, the information written is when it starts, when it commits, when it aborts, and when it modifies a records, specifying the page the record is in, and the old and new values (called \textbf{before image} and \textbf{after image}). Each record is uniquely identified by a LSN (Log Sequence Number), assigned in a strictly increasing order.
 
-A recovery algorithm requires an \textbf{undo} if an update of some committed transaction is stored in the database. An \textit{undo} is needed when a transaction or system failure occurs, copying the before image of the page from the log to the database. A recovery algorithm requires a \textbf{redo} is a transaction is committed before all of its updates are stored in the database (after a system failure), copying the after image in the log to the database.
+A recovery algorithm requires an \textbf{undo} if an update of some committed transaction is stored in the database. An \textit{undo} is needed when a transaction or system failure occurs, copying the before image of the page from the log to the database. A recovery algorithm requires a \textbf{redo} if a transaction is committed before all of its updates are stored in the database (after a system failure), copying the after image in the log to the database.
 
-The downtime of the system is given by the product between the failure rate and the recovery rate. The failure rate cannot be reduced, as we cannot know in advance if a transaction contains an error, or a system/media failure happens. The way to reduce downtime is to reduce recovery time. In practice, this is done via \textbf{checkpoints}. There's different types of checkpoints:
+The downtime of the system is given by the product between the failure rate and the recovery rate. The failure rate cannot be reduced, as we cannot know in advance if a transaction contains an error, or a system/media failure happens. The way to reduce downtime is to reduce recovery time. In practice, this is done via \textbf{checkpoints}. There are different types of checkpoints:
 \begin{itemize}
     \item \textbf{Commit-consistent checkpoint}: when a checkpoint starts, the activation of new transactions is suspended, and the system waits the termination of active transactions; all ``dirty'' pages in the buffer are written to permanent memory; the checkpoint is written to the log file, and a pointer to the corresponding record is stored in a special file called \textbf{restart file}. The system then resumes normal activity. This strategy is simple but inefficient, since the system has to regularly stop.
 
     \item \textbf{Buffer-consistent checkpoint - Version 1}: similar to the previous type, but once the checkpoint starts, it also suspends the execution of currently active transactions. This strategy is more efficient than the previous, but it is still slow because of the buffer flushing operations.
 
-    \item \textbf{No stop checkpoint}: once the checkpoint starts, the checkpoint is written to the log file, along with the ids of currently active transactions; a new thread is started, which scans the buffer and flushes the dirty pages it finds in parallel with the standard transactions, guaranteeing that all pages that were dirty at the beginning of the checkpoint are flushed before its end.
+    \item \textbf{No stop checkpoint}: once the checkpoint starts, the checkpoint is written to the log file, along with the IDs of currently active transactions; a new thread is started, which scans the buffer and flushes the dirty pages it finds in parallel with the standard transactions, guaranteeing that all pages that were dirty at the beginning of the checkpoint are flushed before its end.
 \end{itemize}
 
 \subsection{Recovery from System and Media Failures}
@@ -73,13 +73,13 @@ The algorithm described above is the standard Undo-Redo algorithm, but there exi
 
     \item \textbf{Undo-NoRedo}: requires that all the updates of a transaction must be in the database before the transaction has committed. It uses a \textbf{Force} policy, where buffer pages used by transactions are forcibly flushed before committing. This approach has two problems: it does not work for media failures, and it is costly since it requires a lot of writes to disk.
 
-    \item \textbf{NoUndo-NoRedo}: requires that all the updates of a transaction must be in the database neither before nor after the transaction has committed. It uses NoSteal and Force policies.
+    \item \textbf{NoUndo-NoRedo}:  It requires that the updates of a transaction are never in the database before a commit, but they are all propagated after commit. It uses NoSteal and Force policies.
 \end{itemize}
 Undo-Redo uses Steal and NoForce policies.
 
 NoUndo-NoRedo requires a way to write many pages atomically. This is done using \textbf{shadow pages}. When a transaction updates a page for the first time, a new database page is created, called \textbf{current page}, with a certain address $p$. The old page in the database is unchanged, and becomes a shadow page. The \textbf{New Page Table} (a copy of the Page Table containing all physical addresses of pages) is updated so that the first element contains the physical address $p$ of the current page. All subsequent write and read operations on that page will operate on the current page.
 
-Once the transaction reaches the commit point, the system substitutes all shadow pages with an atomic actions: first, all the pages updated in the buffer are written to the permanent memory, while the Page Table is left unchanged; then, the descriptor of the database is updated with an atomic operation, replacing the pointer to the Page Table with that to the New Page Table, which becomes the Page Table.
+Once the transaction reaches the commit point, the system substitutes all shadow pages with an atomic action: first, all the pages updated in the buffer are written to the permanent memory, while the Page Table is left unchanged; then, the descriptor of the database is updated with an atomic operation, replacing the pointer to the Page Table with that to the New Page Table, which becomes the Page Table.
 
 There are some optimizations of the algorithm:
 \begin{itemize}
