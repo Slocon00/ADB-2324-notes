@@ -8,7 +8,7 @@ When transactions are executed concurrently, their operations are often interlea
 
     \item \textbf{Lost Update (Write-Write Conflict)}: two transactions read the value of the same data $x$ (with no conflict), but then both update $x$ with a new value. Whichever transaction gets to update $x$ last is the one whose change will have an effect on the database, regardless of when it started w.r.t. the other one. 
 \end{itemize}
-A simple way to avoid interference is to allow only \textbf{serializable execution}.
+A simple way to avoid interference is to allow only \textbf{serial execution}.
 \BoxDef{Serial Execution}{
 An execution of a set of transactions $T = \{T_1, \dots, T_n\}$ is serial if, for every pair of transactions $T_i$ and $T_j$, all the operations of $T_i$ are executed before the ones of $T_j$, or vice-versa. 
 }
@@ -182,14 +182,14 @@ The need for the $SIX$ lock is justified by the fact that some transactions may 
     \label{tab:multi-granularity-locks}
 \end{table}
 
-A problem that arises with multi-granularity locks is \textbf{phantom locking}. Imagine two transactions, $T_1$ and $T_2$, which are executing the following operations:
+A problem that arises with multi-granularity locks is \textbf{phantom reads}. Imagine two transactions, $T_1$ and $T_2$, which are executing the following operations:
 \begin{itemize}
     \item $T_1$: SELECT * FROM Students
     \item $T_2$: insert into Students values (100, 'Rossi')
     \item $T_2$: commit
     \item $T_1$: SELECT * FROM Students
 \end{itemize}
-$T_1$ locks the table record by record. Even if strict 2PL protocol is used, this history is still possible. This is because even if $T_1$ has a lock on the data objects in the table Students, $T_2$ is not updating or deleting an existing record, but inserting a new one, and $T_1$ obviously cannot lock an object that cannot exist yet.
+$T_1$ locks the table record by record. Even if strict 2PL protocol is used, this history is still possible. This is because even if $T_1$ has a lock on the data objects in the table Students, $T_2$ is not updating or deleting an existing record, but inserting a new one, and $T_1$ obviously cannot lock an object that does not exist yet.
 
 The same problem can be seen for the following cases:
 \begin{itemize}

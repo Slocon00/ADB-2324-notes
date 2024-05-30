@@ -106,9 +106,9 @@ Another cause of inefficiency in DBMS is the way transactions are programmed. Th
 \begin{itemize}
     \item \textbf{READ UNCOMMITTED}: the reads of records are performed without requesting any locks, so dirty reads are possible;
 
-    \item \textbf{READ COMMITTED}: the transaction obtains locks on records, released right after reading, and exclusive locks before writing (held until the end). This prevents dirty reads but not non-repeatable reads.
+    \item \textbf{READ COMMITTED}: the transaction obtains locks on records, released right after reading, and exclusive locks before writing (held until the end). This prevents dirty reads but not non-repeatable reads. Specifically, it introduces the problem of \textbf{phantom records}: for example, if a transaction reads a set of records from a table which satisfy a condition $\psi$, and right after a second transaction writes a new set of records in that table with also satisfy $\psi$, the first transaction will never see those new records.
 
-    \item \textbf{REPEATABLE READ}: the transaction holds both read and write locks on records released at the end. This avoids     \item \textbf{READ COMMITTED}: the transaction obtains locks on records, released right after reading, and exclusive locks before writing (held until the end). This prevents dirty reads but not non-repeatable reads, but introduces the problem o \textbf{phantom records}: for example, if a transaction reads a set of records from a table which satisfy a condition $\psi$, and right after a second transaction writes a new set of records in that table with also satisfy $\psi$, the first transaction will never see those new records.
+    \item \textbf{REPEATABLE READ}: the transaction holds both read and write locks on records released at the end. This avoids unrepeatable reads.
 
     \item \textbf{SERIALIZABLE}: the default isolation level, where read and write locks are of different sizes. Any read lock on a table will be in conflict with any update. It avoids all problems seen before, but reduces the number of concurrent transactions executable per unit of time.
 \end{itemize}
