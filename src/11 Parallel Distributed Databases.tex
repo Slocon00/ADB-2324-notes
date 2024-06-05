@@ -82,7 +82,7 @@ The data distribution design phase is divided into two steps: first, all relatio
 
 \subsection{Distributed Query Processing}
 
-Since communication between sites has a significant cost, there are some query plans that are more efficient than those used by parallel systems where processors communicate locally. The biggest challenge is computing joins. There are two possibilities: either one of the tables is very small and is sent to the sites containing the fragments of the other, or the \textbf{semijoin reduction} is used.
+Since communication between sites has a significant cost, so query plans must be more efficient than those used by parallel systems where processors communicate locally. The biggest challenge is computing joins. There are two possibilities: either one of the tables is very small and is sent to the sites containing the fragments of the other, or the \textbf{semijoin reduction} is used.
 
 The semijoin plan to compute Join($R(X,Y), S(Y,Z)$) is:
 \begin{enumerate}
@@ -92,7 +92,7 @@ The semijoin plan to compute Join($R(X,Y), S(Y,Z)$) is:
 
     \item $s$ sends $S_1$ to $r$ (the site containing $R$).
 
-    \item $R$ computes the join between $R$ and the semijoin, which is equivalent to the join between the full tables.
+    \item $r$ computes the join between $R$ and the semijoin, which is equivalent to the join between the full tables.
 \end{enumerate}
 This approach is convenient when $Y$ is reasonably smaller than $X$ and $Z$.
 

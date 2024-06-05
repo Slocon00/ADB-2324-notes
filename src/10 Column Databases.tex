@@ -50,13 +50,10 @@ When values of a column represent some continuous function, a common way of comp
 Similar to difference encoding, but used when data is stored in multiple pages. Each page is compressed as the first value followed by all differences.
 
 \paragraph{Frequency Partitioning}
-With frequency partitioning, similar values are put in the same page; each page is compressed via bit-vector or dictionary encoding.
+With frequency partitioning, similar values are put in the same page; each page is compressed via bit-vector or dictionary encoding. Using compressed data requires some modifications to the query execution engine. RLE encoded data can be operated upon without decompression, as long as there is information about the runs' starting positions. Dictionary encoding also allows range queries for range queries. Bit-vector encoding allows any bit operations on sets.
 
-\subsection{Operating on Compressed Data}
-
-Using compressed data requires some modifications to the query execution engine. RLE encoded data can be operated upon without decompression, as long as there is information about the runs' starting positions. Dictionary encoding also allows range queries for range queries. Bit-vector encoding allows any bit operations on sets.
-
-For any other compression algorithm (or any other operation not included above), tuples must be reconstructed, via either \textbf{early materialization} or \textbf{late materialization}.
+\section{Tuple Reconstruction}
+To execute complex queries, tuples must be reconstructed, via either \textbf{early materialization} or \textbf{late materialization}.
 \begin{itemize}
     \item Early materialization simply rebuilds the part of the table the query operates on by scanning and joining all the necessary columns, and then using relational algebra.
 
